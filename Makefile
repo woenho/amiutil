@@ -55,7 +55,8 @@ $(LIBUTIL): $(OBJS)
 	cp util.h ../include
 	cp logger.h ../include
 	cp WebConfig.h ../include
-
+	cp dist/json/json.h ../include
+	cp dist/json/json-forwards.h ../include
 
 clean:
 	rm -f $(LIBUTIL) *.o
