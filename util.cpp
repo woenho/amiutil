@@ -701,23 +701,19 @@ char* strrtrim(char* str, const char* delimiter)
 	if (!str || !*str || !delimiter || !*delimiter)
 		return str;
 
-	char* p = str + strlen(str) - 1;
-	char* save = p;
-	int i;
-	while (p >= str) {
+	size_t len = strlen(str);
+	int n;
+	for (n = len - 1; n >= 0; n--) {
+		int i;
 		for (i = 0; delimiter[i]; i++) {
-			if (*p == delimiter[i]) {
-				p--;
+			if (str[n] == delimiter[i]) {
+				str[n] = '\0';
 				break;
 			}
 		}
-		if (!delimiter[i])
-			break;
+		if (str[n])
+			return str;
 	}
-
-	if (++p <= save)
-		p = '\0';
-
 	return str;
 }
 
