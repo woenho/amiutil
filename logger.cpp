@@ -106,7 +106,11 @@ void con_logfile (const char *file) {
 
     con_logmode(logmode_file);
 
-    strncpy(logfile_buf, file, sizeof(logfile_buf)-1);
+    if (*file == '~') {
+        snprintf(logfile_buf, sizeof(logfile_buf) - 1, "%s%s", getenv("HOME"), file + 1);
+    } else {
+        strncpy(logfile_buf, file, sizeof(logfile_buf) - 1);
+    }
     logfile = logfile_buf;
 #if defined(LOG_LOCK)
     pthread_mutex_init(&mutex_log, NULL);

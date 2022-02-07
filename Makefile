@@ -9,14 +9,16 @@ LIBUTIL = libamiutil.a
 SRCS = util.cpp \
 		logger.cpp \
 		WebConfig.cpp \
+		dist/jsoncpp.cpp \
 		amiutilversion.cpp
 OBJS = $(SRCS:.cpp=.o)
 
 CFLAGS_RELEASE = -O2 -fPIC
 CFLAGS_DEBUG = -O0 -g -ggdb3 -DDEBUG
-CFLAGS  = -Wall -Wextra -Wshadow -Wformat-security -Winit-self -fpermissive
+CFLAGS  = -Wall -Wextra -Wformat-security -Winit-self -fpermissive
 CFLAGS += -Wno-unused-parameter -Wno-missing-field-initializers -Wno-unused-function
-
+# for jsoncpp CFLAGS
+CFLAGS += -Idist/json -std=c++11
 # 이 amiutil은 기본적으로 memcached, openssl, pthread 를 사용한다
 LFLAGS  = -lm -ldl -lpthread -lmemcached -lcrypto
 
@@ -59,6 +61,6 @@ $(LIBUTIL): $(OBJS)
 	cp dist/json/json-forwards.h ../include
 
 clean:
-	rm -f $(LIBUTIL) *.o
+	rm -f $(LIBUTIL) *.o dist/*.o
 
 
