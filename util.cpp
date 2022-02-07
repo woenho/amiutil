@@ -111,7 +111,7 @@ char* getSHA256(const char* data) {
     bzero(mdString, sha_len);
     int i;
     for (i = 0; i < SHA256_DIGEST_LENGTH; i++)
-        sprintf(&mdString[i * 2], "%02x", (unsigned int)digest[i]);
+        sprintf(&mdString[i * 2], "%02X", digest[i] & 0x7F);
 
     return mdString;
 }
@@ -126,7 +126,7 @@ char* getSHA512(const char* data) {
 	bzero(mdString, sha_len);
     int i;
 	for (i = 0; i < SHA512_DIGEST_LENGTH; i++)
-		sprintf(&mdString[i * 2], "%02x", (unsigned int)digest[i]);
+		sprintf(&mdString[i * 2], "%02X", digest[i] & 0x7F);
 
 	return mdString;
 }
@@ -547,7 +547,7 @@ int mk_hex(char* data, int nLen)
 char* mk_hexchar(char* data, int nData, int nLen)
 {
 	char szBuf[32] = { 0, };
-	sprintf(szBuf, "%0*X", nLen, nData);
+	sprintf(szBuf, "%0*X", nLen*2, nData & (nLen == 1 ? 0x7F : nLen == 2 ? 0x7FFF : 0x7FFFFFFF));
 	memcpy(data, szBuf, nLen);
 	return data;
 }
