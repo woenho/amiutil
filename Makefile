@@ -8,6 +8,7 @@ CXX=g++
 LIBUTIL = libamiutil.a
 SRCS = util.cpp \
 		logger.cpp \
+		fileconfig.cpp \
 		WebConfig.cpp \
 		dist/jsoncpp.cpp \
 		amiutilversion.cpp
@@ -56,6 +57,7 @@ $(LIBUTIL): $(OBJS)
 	mkdir -p ../include
 	cp util.h ../include
 	cp logger.h ../include
+	cp fileconfig.h ../include
 	cp WebConfig.h ../include
 	cp dist/json/json.h ../include
 	cp dist/json/json-forwards.h ../include

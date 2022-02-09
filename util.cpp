@@ -668,7 +668,7 @@ char* rtrim(char* str)
 
 	char* p = str + strlen(str) - 1;
 
-	while (p >= str && *p <= ' ')
+	while (p >= str && (*p == ' ' || *p == '\t' || *p == '\n')) // < ' '을 사용하면 utf-8 에서 몽땅 잘릴 수 있다 (== 사용)
 		p--;
 
 	*++p = '\0';
@@ -684,7 +684,7 @@ char* ltrim(char* str)
 	char* src = str;
 	char* p = str + strlen(str);
 
-	while (*src <= ' ')
+	while (*src == ' ' || *src == '\t' || *src == '\n') // < ' '을 사용하면 utf-8 에서 몽땅 잘릴 수 있다 (== 사용)
 		src++;
 
 	if (src == str)
@@ -693,6 +693,33 @@ char* ltrim(char* str)
 	while (src <= p)
 		*str++ = *src++;
 
+	return str;
+}
+
+char* strltrim(char* str, const char* delimiter)
+{
+	if (!str || !*str || !delimiter || !*delimiter)
+		return str;
+
+	char* src = str;
+	char* target = str;
+	while(*src) {
+		int i;
+		for (i = 0; delimiter[i]; i++) {
+			if (*src == delimiter[i]) {
+				*src = '\0';
+				break;
+			}
+		}
+		if (*src) {
+			while (*src) {
+				*target++ = *src++;
+			}
+			*target = '\0';
+			break;
+		}
+		src++;
+	}
 	return str;
 }
 

@@ -51,6 +51,7 @@
 
 #include "WebConfig.h"
 #include "logger.h"
+#include "fileconfig.h"
 
 #if 0
 #define uint    unsigned int
@@ -71,6 +72,8 @@
 
 extern sigset_t g_sigsBlock;	///< 시그널 구조
 extern sigset_t g_sigsOld;		///< 시그널 구조
+
+extern char amiutilCompileDate[20];
 
 #ifdef __cplusplus 
 extern "C"
@@ -111,6 +114,7 @@ extern "C"
 	char* trim(char* str);
 	char* rtrim(char* str);
 	char* ltrim(char* str);
+	char* strltrim(char* str, const char* delimiter);
 	char* strrtrim(char* str, const char* delimiter);
 	char* chomp(char* s);
 
@@ -140,7 +144,9 @@ extern "C"
 #endif
 
 #ifdef __cplusplus 
+
 using namespace std;
+
 class util_exception : public exception {
 	int m_code;
 	string m_message;
@@ -159,6 +165,7 @@ public:
 	int code() { return m_code; }
 	virtual ~util_exception() _GLIBCXX_USE_NOEXCEPT {}; // 컴파일러애 따라서 ~exception이 순수가상이라서 반드시 _GLIBCXX_USE_NOEXCEPT {} 있어야 함
 };
+
 #endif
 
 #if 0
