@@ -39,7 +39,6 @@ typedef struct key_value_t {
 }key_value;
 
 class CKeyset {
-	char* fileconfig_key;
 #if USE_KEYSET_ARRAY
 	int key_count;
 public:
@@ -49,9 +48,10 @@ public:
 	CKeyset(const CKeyset& t) { bzero(this, sizeof(*this)); *this = t; }	// 복사 생성자
 #else
 public:
-	list<key_value*> keyvalue;	// key_value 대신 key_value* 를 사용한 이유: 빈번히 발생되는 복사생성자의 호출을 줄이자
-	CKeyset() { fileconfig_key = NULL; keyvalue.clear(); }
-	CKeyset(const CKeyset& t){ fileconfig_key = NULL; keyvalue.clear(); *this = t; }	// 복사 생성자
+	string config_key;
+	list<key_value*> keyvalue;	// * 를 사용한것은 key_value의 각종 연산자함수를 추가하지 않고 사용하기 위해서이다.
+	CKeyset() { keyvalue.clear(); }
+	CKeyset(const CKeyset& t){ keyvalue.clear(); *this = t; }	// 복사 생성자
 #endif
 	~CKeyset() { reset(); }
 	
@@ -61,7 +61,9 @@ public:
 	void reset();
 	const char* getvalue(const char* key);
 	const char* getvalue(size_t nIndx);
-	const char* getkey(size_t nIndx);
+	const char* getkeyname(size_t nIndx);
+	string getks() { return config_key; }
+	void setks(const char* key) { config_key = key; }
 
 	// access to member
 #if USE_KEYSET_ARRAY
@@ -69,18 +71,12 @@ public:
 #else
 	int getcount() { return keyvalue.size(); }	
 #endif
-	const char* getks() { return fileconfig_key ? fileconfig_key : "";}
-	int setks(const char* key) { 
-		if (!key || !*key) return -1; 
-		if (fileconfig_key) free(fileconfig_key);
-		fileconfig_key = strdup(key);
-		return 0;
-	}
+
 };
 
 class CFileConfig {
 public:
-	map<const char*, CKeyset*> m_config; // CKeyset 클래스를 사용하지 않고 CKeyset*를 이용하는 이유는 자주발생되는 복사생성자의 실행을 줄이기 위해서다
+	map<string, CKeyset*> m_config; // CKeyset 클래스를 사용하지 않고 CKeyset*를 이용하는 이유는 자주발생되는 복사생성자의 실행을 줄이기 위해서다
 	CFileConfig();
 	~CFileConfig();
 	CFileConfig(const CFileConfig& t) { bzero(this, sizeof(*this));	m_config = t.m_config; }	// 복사 생성자

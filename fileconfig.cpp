@@ -6,6 +6,8 @@
 CKeyset& CKeyset::operator=(const CKeyset& t)
 {
 	reset();
+	config_key = t.config_key;
+
 #if USE_KEYSET_ARRAY
 	int i;
 	for (i = 0; i < t.key_count; i++) {
@@ -19,11 +21,6 @@ CKeyset& CKeyset::operator=(const CKeyset& t)
 		add(pkv->key, pkv->value);
 	}
 #endif
-	CKeyset* src = (CKeyset*)&t;	// 바로 억세스하면 컴파일상 워닝 메시지 발생...
-	const char* ks = src->getks();	// 바로 억세스하면 컴파일상 워닝 메시지 발생...
-
-	fileconfig_key = *ks ? strdup(ks) : NULL;
-
 	return *this;
 }
 
@@ -91,7 +88,7 @@ const char* CKeyset::getvalue(size_t nIndx)
 	return "";
 }
 
-const char* CKeyset::getkey(size_t nIndx)
+const char* CKeyset::getkeyname(size_t nIndx)
 {
 #if USE_KEYSET_ARRAY
 	if (nIndx >= key_count)
@@ -117,10 +114,8 @@ const char* CKeyset::getkey(size_t nIndx)
 
 void CKeyset::reset()
 {
-	if (fileconfig_key) {
-		free(fileconfig_key);
-		fileconfig_key = NULL;
-	}
+	config_key.empty();
+
 #if USE_KEYSET_ARRAY
 	if (!key_count) return;
 
@@ -149,7 +144,7 @@ CFileConfig::CFileConfig()
 
 CFileConfig::~CFileConfig()
 {
-	map<const char*, CKeyset*>::iterator it_ks;
+	map<string, CKeyset*>::iterator it_ks;
 	for (it_ks = m_config.begin(); it_ks != m_config.end(); it_ks++) {
 		delete it_ks->second;
 	}
@@ -160,7 +155,7 @@ CFileConfig::~CFileConfig()
 CFileConfig& CFileConfig::operator=(const CFileConfig& t)
 {
 	m_config.clear();
-	map<const char*, CKeyset*>::const_iterator it_ks;
+	map<string, CKeyset*>::const_iterator it_ks;
 	for (it_ks = t.m_config.begin(); it_ks != t.m_config.end(); it_ks++) {
 		this->m_config[it_ks->first] = new CKeyset(*it_ks->second);
 	}
@@ -264,8 +259,8 @@ int CFileConfig::load(const char* file)
 				throw util_exception(140, "section 값은 널이 올 수 없습니다.");
 			}
 			strcpy(szSection, ptr);
-
-			if ( !strcmp(szSection, ks.getks()) || m_config.find(szSection) != m_config.end()) {
+			
+			if ( !ks.getks().compare(szSection) || m_config.find(szSection) != m_config.end()) {
 				throw util_exception(120, "%s section 은 중복되었습니다.", szSection);
 			}
 
