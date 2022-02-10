@@ -290,7 +290,7 @@ int CFileConfig::load(const char* file)
 #endif
 		}
 		fs.close();
-		conpt("-----\nclose fileconfig %s", file);
+		conpt("-----\nclose fileconfig %s", basename(file));
 	}
 	catch (util_exception& e) {
 		conpt("errno=%d, %s", e.code(), e.what());
