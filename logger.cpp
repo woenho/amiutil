@@ -207,6 +207,9 @@ void _con_writef(enum con_callmode cm, const char* file, int line, const char* f
     if (cm == CON_CALLMODE_CONP || cm == CON_CALLMODE_CONPT) {
         printf("%s\n", buf);
         fflush(stdout);
+    } else if (cm == CON_CALLMODE_CONPN || cm == CON_CALLMODE_CONPTN) {
+        printf("%s", buf);
+        fflush(stdout);
     }
 
 #if defined(CON_PRINT_CONSOLE_ONLY)

@@ -52,5 +52,50 @@ void _con_writef (enum con_callmode cm, const char *file, int line, const char *
 #define conpn(...) _con_writef(CON_CALLMODE_CONPN, __FILE__, __LINE__, __func__, __VA_ARGS__)
 #define conptn(...) _con_writef(CON_CALLMODE_CONPTN, __FILE__, __LINE__, __func__, __VA_ARGS__)
 
+#if defined(DEBUGTRACE)
+#define CONF(...)   conp(__VA_ARGS__)
+#define CONFN(...)  conpn(__VA_ARGS__)
+#define CONFT(...)  conpt(__VA_ARGS__)
+#define CONFTN(...) conptn(__VA_ARGS__)
+#else
+#define CONF(...)   conf(__VA_ARGS__)
+#define CONFN(...)  confn(__VA_ARGS__)
+#define CONFT(...)  conft(__VA_ARGS__)
+#define CONFTN(...) conftn(__VA_ARGS__)
+#endif
+#define CONP(...)   conp(__VA_ARGS__)
+#define CONPN(...)  conpn(__VA_ARGS__)
+#define CONPT(...)  conpt(__VA_ARGS__)
+#define CONPTN(...) conptn(__VA_ARGS__)
+
+#ifndef _DEBUGTRACE_
+#define _DEBUGTRACE_
+#if defined(DEBUGTRACE)
+#define TRACE(...) \
+	/* do while(0) 문은 블록이 없는 if문에서도 구문 없이 사용하기 위한 방법이다 */ \
+	do { \
+		struct timeval debug_now; \
+		struct	tm debug_tm; \
+		gettimeofday(&debug_now, NULL); \
+		localtime_r(&debug_now.tv_sec,&debug_tm);\
+		char debug_buf[4096+24]; \
+		int debug_len = sprintf(debug_buf,"%04d-%02d-%02d %02d:%02d:%02d.%.3ld " \
+			, debug_tm.tm_year + 1900 \
+			, debug_tm.tm_mon + 1 \
+			, debug_tm.tm_mday \
+			, debug_tm.tm_hour \
+			, debug_tm.tm_min \
+			, debug_tm.tm_sec \
+			, debug_now.tv_usec / 1000 \
+			); \
+		snprintf(debug_buf+debug_len,sizeof(debug_buf)-debug_len,__VA_ARGS__); \
+		fwrite(debug_buf,sizeof(char),strlen(debug_buf),stdout); \
+		fflush(stdout); \
+	}while(0) 
+#else
+#define TRACE(...) 
+#endif
+#endif
+
 
 #endif

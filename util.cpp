@@ -142,7 +142,7 @@ char* get_auth(const char* szChannel, const char* key, char* path)
     if (auth)
     {
 #ifdef DEBUG_TRACE
-        conft("[%s] key=%s, mem auth :%s:", szChannel, key, auth);
+        CONFT("[%s] key=%s, mem auth :%s:", szChannel, key, auth);
 #endif
     }
     else
@@ -155,16 +155,16 @@ char* get_auth(const char* szChannel, const char* key, char* path)
             , path);
         int ret = system(buf); // -1: errmsg set, 127: error, other: 샐행된 명령이 exit(xxx) 로 리턴한 xxx 값
         if (ret != 0) {
-            conft("[%s] error system(%s)", szChannel, buf);
+            CONFT("[%s] error system(%s)", szChannel, buf);
             goto get_auth_exit;
         }
         auth = load_file(path, &auth_len);
         if (auth) {
 #ifdef DEBUG
-            conft("[%s] key=%s, file auth=%s :%s:", szChannel, key, path, auth);
+            CONFT("[%s] key=%s, file auth=%s :%s:", szChannel, key, path, auth);
 #endif
         } else {
-            conft("[%s] key=%s, Auth file open failed!", szChannel, key);
+            CONFT("[%s] key=%s, Auth file open failed!", szChannel, key);
         }
 		remove(path);// 생성된 크리덴셜 값은 임시값이므로 당근 삭제
 	}
@@ -186,22 +186,22 @@ char* get_memcached(const char* key)
 	host = strdup(g_cfg.Get("MEMCACHED", "host").c_str());
 	int port = atoi(g_cfg.Get("MEMCACHED", "port").c_str());
 #if defined DEBUG_TRACE
-	// conft("MEMCACHED_HOST=%s, get key=%s", host, key);
-	conft("get MEMCACHED_HOST=%s, port=%d key=%s", host, port, key);
+	// CONFT("MEMCACHED_HOST=%s, get key=%s", host, key);
+	CONFT("get MEMCACHED_HOST=%s, port=%d key=%s", host, port, key);
 #endif
     servers = memcached_server_list_append(servers, host?host:"localhost", port, &rc); // localhost 는 환경변수로 대체
     rc = memcached_server_push(memc, servers);
 
     if (rc == MEMCACHED_SUCCESS) {
 #if defined DEBUG_TRACE
-		conft("Added mamcached server successfully");
+		CONFT("Added mamcached server successfully");
 #endif
         uint32_t flags = 0;
         size_t value_length = 0;
         value = memcached_get(memc, key, strlen(key), &value_length, &flags, &rc);
         if (rc != MEMCACHED_SUCCESS) {
 #if defined DEBUG_TRACE
-			conft("Couldn't get key : %s", memcached_strerror(memc, rc));
+			CONFT("Couldn't get key : %s", memcached_strerror(memc, rc));
 #endif
         }
     }
@@ -229,27 +229,27 @@ int set_memcached(const char* key, const char* value, time_t tts)
 	host = strdup(g_cfg.Get("MEMCACHED","host").c_str());
 	int port = atoi(g_cfg.Get("MEMCACHED", "port").c_str());
 #if defined DEBUG_TRACE
-//	conft("MEMCACHED_HOST=%s\n", host);
-	conft("set MEMCACHED_HOST=%s, port=%d key=%s, data=%s", host, port, key, value);
+//	CONFT("MEMCACHED_HOST=%s\n", host);
+	CONFT("set MEMCACHED_HOST=%s, port=%d key=%s, data=%s", host, port, key, value);
 #endif
 	servers = memcached_server_list_append(servers, host ? host : "localhost", port, &rc); // localhost 는 환경변수로 대체
 	rc = memcached_server_push(memc, servers);
 
 	if (rc == MEMCACHED_SUCCESS) {
 #if defined DEBUG_TRACE
-		conft("Added mamcached server successfully");
+		CONFT("Added mamcached server successfully");
 #endif
 		uint32_t flags = 0;
 		rc = memcached_set(memc, key, strlen(key), value, strlen(value), tts, flags);
 		if (rc != MEMCACHED_SUCCESS) {
 #if defined DEBUG_TRACE
-			conft("Couldn't set key : %s", memcached_strerror(memc, rc));
+			CONFT("Couldn't set key : %s", memcached_strerror(memc, rc));
 #endif
 		}
 	}
 	else
 	{
-		conft("Couldn't add memcached server: %s", memcached_strerror(memc, rc));
+		CONFT("Couldn't add memcached server: %s", memcached_strerror(memc, rc));
 	}
 
 	memcached_server_list_free(servers);
@@ -408,7 +408,7 @@ int	tcp_create(int port_no)
 
 	if ((fd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
 	{
-		conft("socket create error port = %d, errno = %d", port_no, errno);
+		CONFT("socket create error port = %d, errno = %d", port_no, errno);
 		return -1;
 	}
 
@@ -426,13 +426,13 @@ int	tcp_create(int port_no)
 			}
 			else if (errno == EADDRINUSE)
 			{
-				conft("bind error. 사용중인 port(%d)임", port_no);
+				CONFT("bind error. 사용중인 port(%d)임", port_no);
 				optval = 1;
 				setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, (char*)&optval, sizeof(optval));
 			}
 			else
 			{
-				conft("bind error. port=%d, errno=%d", port_no, errno);
+				CONFT("bind error. port=%d, errno=%d", port_no, errno);
 			}
 			sleep(BIND_SLEEP_TIME);
 		}
@@ -544,11 +544,11 @@ int mk_hex(char* data, int nLen)
 	return((int)strtol(szBuf, (char**)NULL, 16));
 }
 
-char* mk_hexchar(char* data, int nData, int nLen)
+char* mk_hexchar(char* data, int nData, int nByteLen)
 {
 	char szBuf[32] = { 0, };
-	sprintf(szBuf, "%0*X", nLen*2, nData & (nLen == 1 ? 0x7F : nLen == 2 ? 0x7FFF : 0x7FFFFFFF));
-	memcpy(data, szBuf, nLen);
+	sprintf(szBuf, "%0*X", nByteLen *2, nData & (nByteLen == 1 ? 0x7F : nByteLen == 2 ? 0x7FFF : 0x7FFFFFFF));
+	memcpy(data, szBuf, nByteLen);
 	return data;
 }
 
@@ -572,7 +572,7 @@ int	udp_create(int port_no)
 
 	if ((fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0)
 	{
-		conft("socket create error port = %d, errno = %d", port_no, errno);
+		CONFT("socket create error port = %d, errno = %d", port_no, errno);
 		return -1;
 	}
 
@@ -580,13 +580,13 @@ int	udp_create(int port_no)
 	{
 		if (errno == EADDRINUSE)
 		{
-			conft("bind error. 사용중인 port(%d)임", port_no);
+			CONFT("bind error. 사용중인 port(%d)임", port_no);
 			close(fd);
 			return -1;
 		}
 		else
 		{
-			conft("bind error. port=%d, errno=%d", port_no, errno);
+			CONFT("bind error. port=%d, errno=%d", port_no, errno);
 			close(fd);
 			return -2;
 		}

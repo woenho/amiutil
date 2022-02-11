@@ -106,9 +106,9 @@ extern "C"
 	int udp_send(int _logPort, struct sockaddr_in* pServerAddr, const char* szLog);
 
 	int mk_int(char* data, int nLen);
-	char* mk_char(char* data, int nData, int nLen);
+	char* mk_char(char* data, int nData, int nLen=-1);
 	int mk_hex(char* data, int nLen);
-	char* mk_hexchar(char* data, int nData, int nLen);
+	char* mk_hexchar(char* data, int nData, int nByteLen);
 	char* move_str(char* dest, char* src, int nLen);
 
 	char* trim(char* str);
@@ -174,7 +174,7 @@ extern struct sockaddr_in	g_LogAddr;
 
 #define logging(...) \
 	if( g_logPort < 0 ) \
-	{	conft( __VA_ARGS__ ); }\
+	{	CONFT( __VA_ARGS__ ); }\
 	else \
 	{ \
 		char szLogData[4096] = { 0, }; \
